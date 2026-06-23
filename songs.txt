@@ -1,0 +1,26 @@
+TITLE: Round 1
+
+# Music League ballot builder — song list for the current round.
+#
+# To set up a new round: replace the track links below with this round's songs,
+# update the TITLE line above (optional), then commit. Everyone's app picks it up.
+#
+# Rules:
+#  - One Spotify track link per line: https://open.spotify.com/track/...  (or spotify:track:...)
+#  - The TITLE line shows as the round name in the app. Delete it if you don't want one.
+#  - Any other line (like these comments) is ignored, so leave notes if you like.
+
+https://open.spotify.com/track/0vDwe7rbzdVeGsfelTTrG5
+https://open.spotify.com/track/1qVqPwp9kym1MJxhkC3E8a
+https://open.spotify.com/track/1xRCmlU2GyzGem2vw4glxK
+https://open.spotify.com/track/2nFGIC472JfEAskv3z8iBs
+https://open.spotify.com/track/32uLRYPFYAjNZGC7rQ6PXA
+https://open.spotify.com/track/3cPtZw0oqMEkKlGSF0SLkc
+https://open.spotify.com/track/3ePd4K8tcdfr7KmbuOTrKK
+https://open.spotify.com/track/3kaFCsrbWjhC0o81ZbILmU
+https://open.spotify.com/track/4ZknuVR2jOpMOcfwWpsuEr
+https://open.spotify.com/track/67Jfevvbdxl7KwCdrxYlQc
+https://open.spotify.com/track/6EXi6ZqTITKGtVBKqbphjL
+https://open.spotify.com/track/6r3Ld9WSdUP4sfu5W2tP9E
+https://open.spotify.com/track/77PWOAwOWIcUxG5Nq4U0YE
+https://open.spotify.com/track/7HEgOGOTgdOsyu7WKvduJ9
