@@ -261,29 +261,55 @@ function frameHTML(id){
     'allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style="border:0"></iframe>';
 }
 
-// Lightweight track metadata for the ballot (cover art + name), fetched once and cached
+// Lightweight track metadata for the ballot (cover art + name), fetched once and cached.
+// Only ever runs on the done screen — the comparator uses full embeds, and hitting
+// open.spotify.com in parallel with those iframes gets the whole origin throttled.
 let metaInFlight=false;
+
+async function fetchWithTimeout(url, ms){
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>ctrl.abort(), ms);
+  try{ return await fetch(url, {signal:ctrl.signal}); }
+  finally{ clearTimeout(t); }
+}
+
 async function ensureMeta(ids){
   const need=ids.filter(id=>{ const m=S.meta[id]; return !m || !m.name || !m.art; });
   if(!need.length || metaInFlight) return;
   metaInFlight=true;
   const q=need.slice();
+  let backoff=0;
+
   async function worker(){
     while(q.length){
       const id=q.shift();
       try{
-        const r=await fetch("https://open.spotify.com/oembed?url=https://open.spotify.com/track/"+id);
+        if(backoff) await new Promise(r=>setTimeout(r, backoff));
+        const r=await fetchWithTimeout(
+          "https://open.spotify.com/oembed?url=https://open.spotify.com/track/"+id, 5000);
+        if(r.status===429 || r.status===504){
+          backoff = Math.min(backoff ? backoff*2 : 400, 5000);
+          q.push(id);            // put it back, try again after the pause
+          continue;
+        }
         if(r.ok){
+          backoff = 0;
           const j=await r.json(); const prev=S.meta[id]||{};
           S.meta[id]={ name:prev.name||j.title||"", artist:prev.artist||"", art:prev.art||j.thumbnail_url||"" };
         }
       }catch(e){ /* metadata is best-effort; ballot still works without it */ }
     }
   }
-  await Promise.all([worker(),worker(),worker()]);
-  metaInFlight=false; save();
-  if(S.phase==="done") renderDone();
+
+  try{
+    await Promise.all([worker(),worker()]);
+  } finally {
+    metaInFlight=false;
+    save();
+    if(S.phase==="done") renderDone();
+  }
 }
+  
 function metaInner(id){
   const m=S.meta[id];
   if(m && m.name){
@@ -318,7 +344,7 @@ rawEl.addEventListener("input", ()=>{
 startEl.addEventListener("click", ()=>{
   const parsed=parseTrackIds(rawEl.value); if(parsed.length<2) return;
   S.ids=parsed; S.ranked=[parsed[0]]; S.current=parsed[1]; S.queue=parsed.slice(2);
-  S.lo=0; S.hi=1; S.comparisons=0; S.phase="rank"; save(); ensureMeta(parsed); renderRank(true);
+  S.lo=0; S.hi=1; S.comparisons=0; S.phase="rank"; save(); renderRank(true);
 });
 
 // ---- RANK ----
